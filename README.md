@@ -307,3 +307,142 @@ class Solution {
         return Math.max(left, right) +1;
     }
 }
+
+257. 二叉树的所有路径
+力扣题目链接(opens new window)
+
+给定一个二叉树，返回所有从根节点到叶子节点的路径。
+
+说明: 叶子节点是指没有子节点的节点。
+
+解题递归三要素，
+1. 递归参数与返回值，参数为原来的树root，存所有路径的list，以及储存所有路径的output。
+2. 递归终止条件，当root.left == null && root.right == null的时候，遍历到叶子节点，可以停止遍历，生成一条路径，把这条路径转化为string，然后存到output。
+3. 递归顺序：中把节点放到path里面，然后遍历一直左，再一直遍历右，
+特殊点：不能总是一直加，每次找到一个新路径之后，回去再找右边节点，要删除之前存的最后一个节点。不然就会出现重复节点。
+
+class Solution {
+    public List<String> binaryTreePaths(TreeNode root) {
+        List<String> output = new ArrayList<>();
+        if(root == null) return output;
+        List<Integer> path = new ArrayList<>();
+        traverse(root, path, output);
+        return output;
+    }
+    public void traverse(TreeNode root, List<Integer> path, List<String> output){
+        path.add(root.val);
+        if(root.left == null && root.right == null){
+            StringBuilder sb = new StringBuilder();
+            for(int i = 0; i < path.size() - 1; i++){
+                sb.append(path.get(i)).append("->");
+            }
+            sb.append(path.get(path.size() - 1));
+            output.add(sb.toString());
+        }
+        if(root.left != null){
+            traverse(root.left, path, output);
+            path.remove(path.size()-1);
+        }
+        if(root.right != null){
+            traverse(root.right, path, output);
+            path.remove(path.size()-1);
+        }
+    }
+}
+
+404.左叶子之和
+力扣题目链接(opens new window)
+
+计算给定二叉树的所有左叶子之和。
+
+解题思路递归三要素：
+1. 递归参数和返回值：参数是root，返回值是int(sum)
+2. 递归终止条件root == null，return 0; 
+3. 递归顺序，遍历左边用left接住左边的左子树和，遍历右边用right接住右边的左子树和。中：判断是不是叶子节点，再判断这个叶子节点是左节点的话就加；所有又要知道当前节点的左右，还要知道当前节点是上一个节点的左。
+
+   代码实现：
+class Solution {
+    public int sumOfLeftLeaves(TreeNode root) {
+        if (root == null) return 0;
+        int leftValue = sumOfLeftLeaves(root.left);    // 左
+        int rightValue = sumOfLeftLeaves(root.right);  // 右
+                                                       
+        int midValue = 0;
+        if (root.left != null && root.left.left == null && root.left.right == null) { 
+            midValue = root.left.val;
+        }
+        int sum = midValue + leftValue + rightValue;  // 中
+        return sum;
+    }
+}
+
+513.找树左下角的值
+力扣题目链接(opens new window)
+
+给定一个二叉树，在树的最后一行找到最左边的值。
+
+解题思路：需要知道深度，并且不断更新深度，以及深度那一排对应的第一个节点。所以需要有maxDepth，当前depth， 待更新的result。
+递归三要素：
+1. 递归返回值和参数：需要root，还有的depth来记录当前的深度。多于题目的方法参数，因此新建一个方法。新方法不需要return，只需要在递归过程中修改result就可以。
+2. 递归终止条件: 结束递归有两种方式，一种是return，另一种是全部遍历完成。本题是全部遍历结束退出递归，如果发现叶子节点，就要判断当前层是不是最大深度，是的话更新result，并且更新最大深度。
+3. 递归逻辑：前序遍历，中：当root.left == null && root.right == null的时候，操作。然后向左遍历，向右遍历。
+提示：如果想用return的方式，可以不要判断root.left != null，root.right != null。这样递归会走到root == null 这里结束。
+res 跟 maxDepth必须作为globle，不然不会被改变，因为integer是 pass by value 的。
+
+代码实现：
+class Solution {
+    int res = 0;
+    int maxDepth = Integer.MIN_VALUE;
+    public int findBottomLeftValue(TreeNode root) {
+        res = root.val;
+        int depth = 0;
+        traversal(root, depth);
+        return res;
+    }
+    public void traversal(TreeNode root, int depth ){
+        if(root == null) return;
+        if(root.left == null && root.right == null){
+            if(depth > maxDepth){
+                maxDepth = depth;
+                res = root.val;
+            }
+        } 
+        if(root.left != null){
+            depth++;
+            traversal(root.left, depth);
+            depth--;
+        }
+        if(root.right != null){
+            depth++;
+            traversal(root.right, depth);
+            depth--;
+        }
+    }   
+}
+
+112. 路径总和
+力扣题目链接(opens new window)
+
+给定一个二叉树和一个目标和，判断该树中是否存在根节点到叶子节点的路径，这条路径上所有节点值相加等于目标和。
+
+说明: 叶子节点是指没有子节点的节点。
+
+示例: 给定如下二叉树，以及目标和 sum = 22，
+返回 true, 因为存在目标和为 22 的根节点到叶子节点的路径 5->4->11->2。
+
+解题思路：可以通过不段修改sum的值传入到新的递归中来判断。每进入下一层都传sum= sum - 上一层的root值。
+递归三要素：
+1. 递归返回值和参数：参数为root，和sum，返回值就是boolean.
+2. 递归终止条件：当root == null 的时候，结束递归return false；
+3. 递归顺序，前序遍历， 中：如果当前是叶子节点，并且root的值等于sum，return true，否则的话遍历左边用left 接住结果，遍历右边，用left接住结果。只要出现true就可以结束。
+
+代码实现：
+class Solution {
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        if(root == null) return false;
+        if(root.left == null && root.right == null) return root.val == targetSum;
+        if(hasPathSum(root.left, targetSum - root.val)) return true;
+        if(hasPathSum(root.right, targetSum - root.val)) return true;
+        return false;
+    }
+}
