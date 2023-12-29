@@ -446,3 +446,68 @@ class Solution {
         return false;
     }
 }
+
+654.最大二叉树
+
+给定一个不含重复元素的整数数组。一个以此数组构建的最大二叉树定义如下：
+
+二叉树的根是数组中的最大元素。
+左子树是通过数组中最大值左边部分构造出的最大二叉树。
+右子树是通过数组中最大值右边部分构造出的最大二叉树。
+通过给定的数组构建最大二叉树，并且输出这个树的根节点。
+
+解题思路：
+1. 返回值和参数：返回值即是root节点，参数为传入的数组，以及构建子树时要查找的新节点的index范围：leftIndex, rightIndex.
+2. 递归终止条件：当leftIndex < rightIndex的时候，就是已经无法查找，可以结束递归，return null。（就是return 到上一层）；
+3. 递归顺序，中左右，中：找到当前index范围内的最大值，作为一个root，并且记住当前的最大值对应的maxIndex，然后遍历左边，把maxIndex 作为新的rightIndex, 遍历右边，把maxIndex+1 作为新的leftIndex, 
+提示：return是从下往上连接的，
+代码实现;
+class Solution {
+    public TreeNode constructMaximumBinaryTree(int[] nums) {
+        return constructMaximumBinaryTree(nums, 0, nums.length);
+    }
+
+    public TreeNode constructMaximumBinaryTree(int[] nums, int leftIndex, int rightIndex) {
+        if(rightIndex - leftIndex < 1) return null;
+        if(rightIndex - leftIndex == 1) return new TreeNode(nums[leftIndex]);
+        int maxNum = nums[leftIndex];
+        int maxIndex = leftIndex;
+        for(int i = leftIndex + 1; i < rightIndex; i++){
+            if(nums[i] > maxNum){
+                maxNum = nums[i];
+                maxIndex = i;
+            }
+        }
+        TreeNode root = new TreeNode(maxNum);
+        root.left = constructMaximumBinaryTree(nums, leftIndex, maxIndex);
+        root.right = constructMaximumBinaryTree(nums, maxIndex + 1, rightIndex);
+        return root;
+    }
+}
+
+617.合并二叉树
+力扣题目链接(opens new window)
+
+给定两个二叉树，想象当你将它们中的一个覆盖到另一个上时，两个二叉树的一些节点便会重叠。
+
+你需要将他们合并为一个新的二叉树。合并的规则是如果两个节点重叠，那么将他们的值相加作为节点合并后的新值，否则不为 NULL 的节点将直接作为新二叉树的节点。
+
+解题思路：同时遍历两颗树，如果这个位置节点两棵树都存在，就相加并作为新节点，如果只有一颗有，那就取这颗的，如果都是null，就return null。
+1. 递归返回值和参数：返回值是新的root，参数就两棵树的root。
+2. 递归终止条件：当root1 == null || root1 == null的时候，就return 不为空的root，
+3. 递归顺序，中：t1的value + t2的value作为t1的value，遍历左边用left接住，遍历右边right接住，最终人突然t1;
+
+代码实现：
+class Solution {
+    // 递归
+    public TreeNode mergeTrees(TreeNode root1, TreeNode root2) {
+        if (root1 == null) return root2;
+        if (root2 == null) return root1;
+        root1.val += root2.val;//中
+        root1.left = mergeTrees(root1.left,root2.left);//左
+        root1.right = mergeTrees(root1.right,root2.right);//右
+        return root1;
+    }
+}
+
+
