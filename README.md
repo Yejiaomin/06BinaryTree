@@ -510,4 +510,146 @@ class Solution {
     }
 }
 
+700.二叉搜索树中的搜索
 
+给定二叉搜索树（BST）的根节点和一个值。 你需要在BST中找到节点值等于给定值的节点。 返回以该节点为根的子树。 如果节点不存在，则返回 NULL。
+
+解题思路：可以普通遍历所有节点来查询是否有root.val == val,但是因为二叉搜索树的有序性特征，可以在遍历之前做比较，val大于root.val 的话，往右走，小的话往左右。
+1. 参数与返回值：返回值是null 或者找到的root.
+2. 终止条件：如果root == null（找不到）或者root.val == val （找到了），return root。
+3. 单层遍历顺序：中左右，中：判断root.val == val， 如果val 大于root.val向左遍历，否则向右，需要用一个left跟right来接住遍历结果，
+
+代码实现：
+class Solution {
+    // 递归，利用二叉搜索树特点，优化
+    public TreeNode searchBST(TreeNode root, int val) {
+        if (root == null || root.val == val) {
+            return root;
+        }
+        if (val < root.val) {
+            return searchBST(root.left, val);
+        } else {
+            return searchBST(root.right, val);
+        }
+    }
+}
+
+class Solution {
+    // 递归，普通二叉树
+    public TreeNode searchBST(TreeNode root, int val) {
+        if (root == null || root.val == val) {
+            return root;
+        }
+        TreeNode left = searchBST(root.left, val);
+        if (left != null) {
+            return left;
+        }
+        return searchBST(root.right, val);
+    }
+}
+
+98.验证二叉搜索树
+
+给定一个二叉树，判断其是否是一个有效的二叉搜索树。
+
+假设一个二叉搜索树具有如下特征：
+
+节点的左子树只包含小于当前节点的数。
+节点的右子树只包含大于当前节点的数。
+所有左子树和右子树自身必须也是二叉搜索树。
+
+解题思路：判断二叉树搜索是否有效，主要是判断左子树是否有效，右子树是否有效。并且结合二叉搜索树的中序遍历是一个递增的序列。所以只要检查后面的值都比前面的值小就可以了。
+1. 返回值和参数：boolean 跟传入的树root。
+2. 终止条件： 如果root == null， return false；
+3. 中序遍历，一开始设定max为long最小值，然后遍历左边，中：root 大于 max，然后更新max的值，小于的话return false。然后遍历右边。
+
+代码实现：
+class Solution {
+    // 递归
+    TreeNode max;
+    public boolean isValidBST(TreeNode root) {
+        if (root == null) {
+            return true;
+        }
+        // 左
+        boolean left = isValidBST(root.left);
+        if (!left) {
+            return false;
+        }
+        // 中
+        if (max != null && root.val <= max.val) {
+            return false;
+        }
+        max = root;
+        // 右
+        boolean right = isValidBST(root.right);
+        return right;
+    }
+}
+
+530.二叉搜索树的最小绝对差
+力扣题目链接(opens new window)
+
+给你一棵所有节点为非负值的二叉搜索树，请你计算树中任意两节点的差的绝对值的最小值。
+
+解题思路： 除了遍历所有节点外，同时需要一个min来一直更新，并且需要pre节点来跟当前节点对减。
+1. 返回值和参数：minValue 是全局变量，所以遍历方法还是可以返回值为void，参数为树root，
+2. 终止条件：当 root == null，就return返回。
+3. 遍历顺序：左中右，左边遍历，中：用pre来记录root，然后逐个几点对比更新minValue的值，再遍历右边。
+
+代码实现：
+class Solution {
+    TreeNode pre;// 记录上一个遍历的结点
+    int result = Integer.MAX_VALUE;
+    public int getMinimumDifference(TreeNode root) {
+       if(root==null)return 0;
+       traversal(root);
+       return result;
+    }
+    public void traversal(TreeNode root){
+        if(root==null)return;
+        //左
+        traversal(root.left);
+        //中
+        if(pre!=null){
+            result = Math.min(result,root.val-pre.val);
+        }
+        pre = root;
+        //右
+        traversal(root.right);
+    }
+}
+
+236. 二叉树的最近公共祖先
+力扣题目链接(opens new window)
+
+给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。
+
+百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”
+
+解题思路：这个属于要从下往上要找的题目，所有采用后续遍历，先去左子树，右子树找，找到p或者q那就向上返回，没找到就返回null，最后判断左右两边情况，都是null，就说明找不到，一个null，一个有，那就是有的那个，如果两边都有，那就是左右的根root。
+1. 返回值和参数：返回值是节点，传入的是数root，还有待查找的p、q.
+2. 终止条件，找到p或者q,或者找到叶子节点也没找到，就是return，return内容可以参考如果这棵树只有一个节点满足这些情况的话，应该要return自己本身，所以return root。
+3. 单层递归逻辑，左右遍历，用left，right接住返回值，中（root）：对左右返回值节点做判断。
+
+代码实现：
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) { // 递归结束条件
+            return root;
+        }
+        // 后序遍历
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+
+        if(left == null && right == null) { // 若未找到节点 p 或 q
+            return null;
+        }else if(left == null && right != null) { // 若找到一个节点
+            return right;
+        }else if(left != null && right == null) { // 若找到一个节点
+            return left;
+        }else { // 若找到两个节点
+            return root;
+        }
+    }
+}
